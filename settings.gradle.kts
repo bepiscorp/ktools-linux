@@ -5,4 +5,5 @@ include(
     ":cli",
     ":commands:hello",
     ":commands:version",
+    ":commands:md2pdf",
 )

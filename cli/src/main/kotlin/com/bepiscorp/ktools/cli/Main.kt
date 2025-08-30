@@ -2,6 +2,7 @@ package com.bepiscorp.ktools.cli
 
 import com.bepiscorp.ktools.commands.hello.HelloCommand
 import com.bepiscorp.ktools.commands.version.VersionCommand
+import com.bepiscorp.ktools.commands.md2pdf.Md2PdfCommand
 import com.bepiscorp.ktools.core.di.coreModule
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
@@ -17,6 +18,7 @@ fun main(args: Array<String>) {
         KTools().subcommands(
             HelloCommand(),
             VersionCommand(),
+            Md2PdfCommand(),
         ).main(args)
     } finally {
         // Ensure DI context is shut down to avoid resource leaks in long sessions/tests
