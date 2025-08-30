@@ -5,12 +5,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import java.io.File
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.nio.file.Files
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
 /** Bridge to the Docker-based md2pdf service. */
 class DockerBridge {
+
+    private val log = KotlinLogging.logger {}
 
     private val imageName = "realdennis/md2pdf:latest"
     private val containerPrefix = "ktools-md2pdf"
@@ -93,7 +96,7 @@ class DockerBridge {
 
     private suspend fun pullDockerImage(): Unit =
         withContext(Dispatchers.IO) {
-            println("Pulling Docker image: $imageName")
+            log.info { "Pulling Docker image: $imageName" }
 
             val process = ProcessBuilder("docker", "pull", imageName)
                 .redirectErrorStream(true)

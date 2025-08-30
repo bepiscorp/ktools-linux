@@ -1,16 +1,7 @@
 package io.github.koog
 
-/** Minimal placeholder for Koog logger.
- * Replace with real library when available.
- */
-class Logger(
-    private val name: String
-) {
-    fun info(msg: () -> String) = println("[INFO] [$name] ${'$'}{msg()}")
+@Deprecated("Replaced by kotlin-logging; this file left to ease migration", level = DeprecationLevel.ERROR)
+class Logger
 
-    fun error(msg: () -> String) = println("[ERROR] [$name] ${'$'}{msg()}")
-}
-
-object Koog {
-    fun logger(name: String) = Logger(name)
-}
+@Deprecated("Replaced by kotlin-logging; this file left to ease migration", level = DeprecationLevel.ERROR)
+object Koog

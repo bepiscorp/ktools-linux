@@ -15,6 +15,7 @@ import com.github.ajalt.clikt.parameters.types.choice
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import io.github.oshai.kotlinlogging.KLogger
 import java.io.File
 
 @Serializable
@@ -30,7 +31,7 @@ class Md2PdfCommand :
     JsonCommand(help = "Convert Markdown files to PDF using md2pdf"),
     KoinComponent {
 
-    private val log by inject<io.github.koog.Logger>()
+    private val log by inject<KLogger>()
 
     // Input arguments
     private val inputs by argument(
@@ -151,9 +152,9 @@ class Md2PdfCommand :
                     val result = processor.convert(options)
 
                     if (!result.success && !quiet) {
-                        System.err.println("ERROR ${result.exitCode}: ${result.message}")
+                        log.error { "ERROR ${result.exitCode}: ${result.message}" }
                         if (result.hint.isNotEmpty()) {
-                            System.err.println("Hint: ${result.hint}")
+                            log.warn { "Hint: ${result.hint}" }
                         }
                     }
 
@@ -174,10 +175,10 @@ class Md2PdfCommand :
                 }
             }
         } catch (e: Exception) {
-            log.error { "Unexpected error in md2pdf command: ${e.message}" }
+            log.error(e) { "Unexpected error in md2pdf command" }
             if (!quiet) {
-                System.err.println("ERROR 2: Unexpected error: ${e.message}")
-                System.err.println("Hint: Run with --verbose for more details or report this issue")
+                log.error { "ERROR 2: Unexpected error: ${e.message}" }
+                log.warn { "Hint: Run with --verbose for more details or report this issue" }
             }
             kotlin.system.exitProcess(2)
         }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import java.io.File
+import io.github.oshai.kotlinlogging.KLogger
 
 /** Main processor for md2pdf conversions. */
 class Md2PdfProcessor(
@@ -15,7 +16,7 @@ class Md2PdfProcessor(
     private val verbose: Boolean,
     private val quiet: Boolean,
     private val config: File?,
-    private val log: io.github.koog.Logger
+    private val log: KLogger
 ) {
     private val engineDetector = EngineDetector()
     private val configLoader = ConfigLoader()
@@ -81,9 +82,7 @@ class Md2PdfProcessor(
 
             // Select and initialize engine
             val engineInfo = selectEngine()
-            if (!quiet) {
-                println("Using ${engineInfo.name} mode")
-            }
+            if (!quiet) log.info { "Using ${engineInfo.name} mode" }
 
             // Process inputs
             val inputs = runBlocking { expandInputs(options.inputs, options.allowRemote) }
@@ -312,9 +311,7 @@ class Md2PdfProcessor(
             inputs.mapIndexed { index, input ->
                 async {
                     semaphore.withPermit {
-                        if (!quiet) {
-                            println("[${index + 1}/${inputs.size}] Processing ${input.displayName}")
-                        }
+                        if (!quiet) log.info { "[${index + 1}/${inputs.size}] Processing ${input.displayName}" }
 
                         try {
                             processSingle(input, options, config, engineInfo)

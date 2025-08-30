@@ -4,6 +4,7 @@ import com.bepiscorp.ktools.core.cli.JsonCommand
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import io.github.oshai.kotlinlogging.KLogger
 
 @Serializable
 private data class HelloResponse(
@@ -14,7 +15,7 @@ private data class HelloResponse(
 class HelloCommand :
     JsonCommand(help = "Prints greeting"),
     KoinComponent {
-    private val log by inject<io.github.koog.Logger>()
+    private val log by inject<KLogger>()
 
     override fun run() {
         log.info { "hello invoked" }
