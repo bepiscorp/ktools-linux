@@ -14,6 +14,13 @@ import java.io.File
 class ConfigLoader {
     fun load(command: String? = null): Config {
         val baseDir = File(System.getProperty("user.home"), ".config/ktools")
+        if (!baseDir.exists()) {
+            try {
+                baseDir.mkdirs()
+            } catch (_: SecurityException) {
+                // If we cannot create the directory, continue gracefully using defaults
+            }
+        }
         val configs = mutableListOf<Config>()
 
         val globalFile = File(baseDir, "config.conf")

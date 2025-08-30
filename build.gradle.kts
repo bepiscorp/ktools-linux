@@ -58,3 +58,8 @@ spotless {
         prettier().config(mapOf("parser" to "markdown"))
     }
 }
+
+tasks.named<Wrapper>("wrapper") {
+    gradleVersion = "9.0.0"
+    distributionType = Wrapper.DistributionType.ALL
+}

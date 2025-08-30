@@ -4,7 +4,6 @@ plugins {
 
 application {
     mainClass.set("com.bepiscorp.ktools.cli.MainKt")
-    applicationDefaultJvmArgs = listOf("-Dktools.version=${'$'}{project.version}")
 }
 
 dependencies {
