@@ -1,0 +1,3 @@
+#!/bin/sh
+./gradlew spotlessApply >/dev/null
+npx markdownlint README.md CHANGELOG.md docs/**/*.md
