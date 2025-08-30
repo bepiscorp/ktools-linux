@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
-// Import md2pdf - this will be available after npm install
-let md2pdf;
+// Import md-to-pdf - this will be available after npm install
+let mdToPdf;
 try {
-    md2pdf = require('md2pdf');
+    mdToPdf = require('md-to-pdf').mdToPdf;
 } catch (e) {
-    console.error('md2pdf module not found. Run: npm install md2pdf');
+    console.error('md-to-pdf module not found. Run: npm install md-to-pdf');
     process.exit(1);
 }
 
@@ -28,21 +28,21 @@ async function convert() {
         // Read markdown content
         const markdown = fs.readFileSync(inputFile, 'utf8');
         
-        // Configure conversion options
-        const md2pdfOptions = {
+        // Configure conversion options for md-to-pdf
+        const mdToPdfOptions = {
             pdf_options: {
                 format: options.pageSize || 'A4',
                 margin: parseMargin(options.margin),
                 printBackground: true,
                 timeout: (options.timeout || 60) * 1000
             },
-            css_style: buildCssStyle(options),
-            highlight_style: options.theme || 'github'
+            css: buildCssStyle(options)
         };
-        
+
         // Perform conversion
-        const pdfBuffer = await md2pdf.convert(markdown, md2pdfOptions);
-        
+        const result = await mdToPdf({ content: markdown }, mdToPdfOptions);
+        const pdfBuffer = result.content;
+
         // Write output
         const outputPath = options.output;
         if (outputPath === '-') {
@@ -54,7 +54,7 @@ async function convert() {
         console.log('Conversion successful');
         process.exit(0);
     } catch (error) {
-        console.error('Conversion failed:', error.message);
+        console.error('Conversion failed:', error && error.message ? error.message : String(error));
         process.exit(1);
     }
 }

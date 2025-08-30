@@ -59,7 +59,17 @@ spotless {
     }
     format("markdown") {
         target("**/*.md")
-        prettier().config(mapOf("parser" to "markdown"))
+        // Prefer nvm-managed node if available, otherwise let Spotless auto-detect
+        val nvmNode =
+            System.getenv("NVM_BIN")?.let { bin ->
+                val candidate = java.io.File(bin, "node")
+                if (candidate.exists() && candidate.canExecute()) candidate.absolutePath else null
+            }
+        if (nvmNode != null) {
+            prettier().nodeExecutable(nvmNode).config(mapOf("parser" to "markdown"))
+        } else {
+            prettier().config(mapOf("parser" to "markdown"))
+        }
     }
 }
 

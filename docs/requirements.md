@@ -4,83 +4,35 @@ This document captures the system requirements for ktools-linux. It includes the
 
 ### 🎯 Initial Scaffold Requirements
 
-```
-You are an expert Kotlin developer. Generate a complete scaffold for a modern Linux CLI tool family called **ktools-linux**, inspired by git-style subcommands (e.g. `ktools status`, `ktools init`). The project must be highly modular, extensible, and future-proof.
-
-⚡ Core Requirements:
-- Language: Kotlin 2+
-- Build system: Gradle 9+ with Kotlin DSL (`build.gradle.kts`)
-- Plugins: `application`, Kotlin plugin, Kotlin serialization, Dokka
-- Libraries:
-  - Clikt → command-line parsing and subcommand structure
-  - Koin → dependency injection
-  - kotlinx.coroutines → async operations
-  - Ktor → network requests
-  - Koog → structured logging
-  - kotlinx.serialization → JSON output
-  - HOCON (`com.typesafe:config` + Kotlin wrapper) → configuration
-- Config system:
-  - Global config at `~/.config/ktools/config.conf`
-  - Per-command configs at `~/.config/ktools/<command>.conf`
-  - Fallback to sensible defaults if config files are missing
-- CLI UX:
-  - Must run on macOS, Debian, and inside CI pipelines
-  - Clear, user-friendly error messages
-  - All commands support `--json` flag (switch output format to JSON using kotlinx.serialization)
-- Versioning:
-  - Semantic Versioning (SemVer) for releases
-  - `version` command prints project version from Gradle `version`
-- Commits & Code Style:
-  - Conventional Commits enforced (with scopes for ktools subcommands, e.g. `feat(hello): ...`)
-  - Git hooks:
-    - `commitlint` for Conventional Commits
-    - `spotless` + `ktlint` for Kotlin formatting
-    - `markdownlint` for documentation
-  - Code style:
-    - Follow **Google Kotlin Style Guide**
-    - Use JetBrains Kotlin style as fallback
-    - Document code style rules in the developer docs
-- Testing:
-  - Use `kotest` for tests
-  - Use `mockk` for mocking
-  - Use `testcontainers` for integration testing
-- Documentation:
-  - Dokka for Kotlin API docs
-  - MkDocs with Mermaid diagrams for user/developer documentation
-  - Documentation must include:
-    - Coding style standards (Google → JetBrains fallback)
-    - Contribution guide (commits, branching, testing)
-    - Instructions for adding new commands
-- Architecture:
-  - Multimodule Gradle project:
-    - `:core` → base config loader, DI setup, logging, shared utilities
-    - `:cli` → entrypoint, Clikt setup, plugin loader (future-ready, placeholder for ServiceLoader-based plugin discovery)
-    - `:commands:hello` → demo command
-    - `:commands:version` → demo command
-  - Commands should be designed so they can later be loaded dynamically as plugins
-  - Use Koin for wiring dependencies
-- Deliverables:
-  1. Gradle project structure (multimodule, with `settings.gradle.kts`)
-  2. `Main.kt` entrypoint in `:cli` that discovers and registers commands
-  3. Example implementations:
-     - `hello` → prints “Hello from ktools!”
-     - `version` → prints current project version
-  4. Config management layer in `:core` (global + per-command configs with HOCON)
-  5. DI setup with Koin (logger, config loader, services)
-  6. Logging integration with Koog (structured, with levels)
-  7. All commands accept `--json` flag (switch output format to JSON via kotlinx.serialization)
-  8. Git hooks for commitlint, spotless+ktlint, markdownlint
-  9. Basic test scaffolding with kotest + mockk + testcontainers
-  10. Documentation setup with Dokka + MkDocs (Mermaid diagrams enabled)
-  11. Code style documented and enforced (Google Kotlin Style Guide primary, JetBrains style fallback)
-  12. Comments in code explaining:
-      - how to add new commands
-      - how to wire them into Koin
-      - how to extend configs
-      - where future plugin loading will be implemented
-
-🚫 Output only Kotlin/Gradle code, config files, and comments. Do not output explanations.
-```
+| ID    | Requirement                                                                                                                   |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------- |
+| SR-1  | Language: Kotlin 2+                                                                                                           |
+| SR-2  | Build system: Gradle 9+ with Kotlin DSL (`build.gradle.kts`)                                                                  |
+| SR-3  | Plugins: `application`, Kotlin, Kotlin serialization, Dokka                                                                   |
+| SR-4  | Libraries: Clikt, Koin, kotlinx.coroutines, Ktor, Koog, kotlinx.serialization, HOCON (`com.typesafe:config` + Kotlin wrapper) |
+| SR-5  | Config: Global config at `~/.config/ktools/config.conf`                                                                       |
+| SR-6  | Config: Per-command configs at `~/.config/ktools/<command>.conf`                                                              |
+| SR-7  | Config: Sensible defaults when config files are missing                                                                       |
+| SR-8  | CLI UX: Runs on macOS, Debian, and inside CI; user-friendly errors                                                            |
+| SR-9  | CLI UX: All commands support `--json` output via kotlinx.serialization                                                        |
+| SR-10 | Versioning: Semantic Versioning; `version` command prints Gradle `version`                                                    |
+| SR-11 | Commits & hooks: Conventional Commits; git hooks for commitlint, spotless+ktlint, markdownlint                                |
+| SR-12 | Code style: Google Kotlin Style Guide; JetBrains style fallback; rules documented                                             |
+| SR-13 | Testing: `kotest`, `mockk`, `testcontainers`                                                                                  |
+| SR-14 | Docs: Dokka for API docs; MkDocs with Mermaid; include coding style, contribution guide, adding commands                      |
+| SR-15 | Architecture: Multimodule Gradle project (`:core`, `:cli`, `:commands:hello`, `:commands:version`)                            |
+| SR-16 | Architecture: Commands future-ready for plugin loading; Koin for DI wiring                                                    |
+| SR-17 | Deliverable: Gradle project structure with `settings.gradle.kts`                                                              |
+| SR-18 | Deliverable: `Main.kt` in `:cli` that discovers and registers commands                                                        |
+| SR-19 | Deliverable: Example commands `hello` and `version`                                                                           |
+| SR-20 | Deliverable: Config management layer in `:core` (global + per-command via HOCON)                                              |
+| SR-21 | Deliverable: DI setup with Koin (logger, config loader, services)                                                             |
+| SR-22 | Deliverable: Logging integration with Koog (structured levels)                                                                |
+| SR-23 | Deliverable: `--json` supported by all commands                                                                               |
+| SR-24 | Deliverable: Git hooks configured (commitlint, spotless+ktlint, markdownlint)                                                 |
+| SR-25 | Deliverable: Basic test scaffolding with kotest + mockk + testcontainers                                                      |
+| SR-26 | Deliverable: Documentation setup with Dokka + MkDocs (Mermaid enabled)                                                        |
+| SR-27 | Deliverable: Code comments explaining adding commands, wiring Koin, extending configs, and future plugin loading location     |
 
 ### 🧰 md2pdf Integration Requirements
 

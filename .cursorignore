@@ -1,4 +1,6 @@
+.patches/
 .venv/
+
 .gradle/
 **/build/
 .idea/
