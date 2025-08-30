@@ -24,7 +24,7 @@ See [docs](docs/index.md) for full details. Product and integration specs live i
 ```bash
 uv venv .venv
 source .venv/bin/activate
-uv pip install --upgrade mkdocs pymdown-extensions mkdocs-material
+uv pip install --upgrade mkdocs pymdown-extensions mkdocs-material mkdocs-mermaid2-plugin
 ```
 - Serve locally with live reload:
 ```bash
