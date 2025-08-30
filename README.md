@@ -32,15 +32,12 @@ uv pip install --upgrade mkdocs pymdown-extensions mkdocs-material mkdocs-mermai
 
 ```bash
 mkdocs serve
-# or bind to all interfaces
-mkdocs serve -a 0.0.0.0:8000
 ```
 
 - Build static site:
 
 ```bash
 mkdocs build --clean
-# output in ./site/
 ```
 
 ## 💿 Install (use `ktools` from your shell)

@@ -2,6 +2,8 @@
 
 Welcome to ktools-linux.
 
+See Requirements for product and integration specs: [requirements](requirements.md).
+
 ## ▶️ Running
 
 - **Via Gradle**:

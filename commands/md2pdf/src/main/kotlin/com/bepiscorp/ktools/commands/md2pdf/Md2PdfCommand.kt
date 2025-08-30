@@ -30,7 +30,6 @@ private data class Md2PdfResponse(
 class Md2PdfCommand :
     JsonCommand(help = "Convert Markdown files to PDF using md2pdf"),
     KoinComponent {
-
     private val log by inject<KLogger>()
 
     // Input arguments
@@ -40,9 +39,9 @@ class Md2PdfCommand :
 
     // Output options
     private val output by option("-o", "--output", help = "Output PDF file path. Use '-' for stdout")
-        .file()
+        .file(mustExist = false, canBeFile = true, canBeDir = false, mustBeWritable = false)
     private val outputDir by option("-O", "--output-dir", help = "Directory for generated PDFs (batch mode)")
-        .file()
+        .file(mustExist = false, canBeFile = false, canBeDir = true, mustBeWritable = false)
     private val outputPattern by option(
         "--output-pattern",
         help = "Naming template using {dir}, {base}, {name}, {ext} (e.g., '{dir}/pdf/{base}.pdf')"

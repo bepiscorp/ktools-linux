@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 /** Base command that adds a --json flag for all subcommands. */
 abstract class JsonCommand(
     help: String
-) : CliktCommand(help = help) {
+) : CliktCommand(help = help, invokeWithoutSubcommand = true) {
     private val json by option("--json", help = "Output in JSON").flag()
 
     protected fun <T> respond(value: T, serializer: kotlinx.serialization.KSerializer<T>, text: String,) {
