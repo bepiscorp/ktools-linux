@@ -15,7 +15,28 @@ Modular Kotlin CLI tools for Linux with git-style subcommands.
 
 ## 📚 Documentation
 
-See [docs](docs/index.md) for full details.
+See [docs](docs/index.md) for full details. Product and integration specs live in [docs/requirements.md](docs/requirements.md).
+
+## 📖 Docs (MkDocs)
+
+- Location: `mkdocs.yml` and `docs/`
+- Install:
+```bash
+uv venv .venv
+source .venv/bin/activate
+uv pip install --upgrade mkdocs pymdown-extensions mkdocs-material
+```
+- Serve locally with live reload:
+```bash
+mkdocs serve
+# or bind to all interfaces
+mkdocs serve -a 0.0.0.0:8000
+```
+- Build static site:
+```bash
+mkdocs build --clean
+# output in ./site/
+```
 
 ## ▶️ Run via Gradle
 
