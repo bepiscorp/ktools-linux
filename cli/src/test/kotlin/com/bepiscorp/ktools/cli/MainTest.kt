@@ -5,7 +5,8 @@ import io.kotest.matchers.shouldBe
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 
-class MainTest : StringSpec({
+class MainTest :
+    StringSpec({
     "prints help when no args" {
         val out = captureStdout {
             main(arrayOf())

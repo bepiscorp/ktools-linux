@@ -6,10 +6,14 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Serializable
-private data class HelloResponse(val message: String)
+private data class HelloResponse(
+    val message: String
+)
 
 /** Example hello command. */
-class HelloCommand : JsonCommand(help = "Prints greeting"), KoinComponent {
+class HelloCommand :
+    JsonCommand(help = "Prints greeting"),
+    KoinComponent {
     private val log by inject<io.github.koog.Logger>()
 
     override fun run() {

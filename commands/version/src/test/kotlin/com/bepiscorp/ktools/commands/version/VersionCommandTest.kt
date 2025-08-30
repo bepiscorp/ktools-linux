@@ -7,7 +7,8 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.string.shouldContain
 import org.koin.core.context.startKoin
 
-class VersionCommandTest : StringSpec({
+class VersionCommandTest :
+    StringSpec({
     beforeSpec { startKoin { modules(coreModule) } }
 
     "prints version" {

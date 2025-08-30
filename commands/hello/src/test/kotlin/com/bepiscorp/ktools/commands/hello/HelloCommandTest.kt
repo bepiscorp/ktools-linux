@@ -6,7 +6,8 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.string.shouldContain
 import org.koin.core.context.startKoin
 
-class HelloCommandTest : StringSpec({
+class HelloCommandTest :
+    StringSpec({
     beforeSpec { startKoin { modules(coreModule) } }
 
     "prints greeting" {

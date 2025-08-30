@@ -5,7 +5,9 @@ import com.bepiscorp.ktools.core.BuildInfo
 import kotlinx.serialization.Serializable
 
 @Serializable
-private data class VersionResponse(val version: String)
+private data class VersionResponse(
+    val version: String
+)
 
 /** Prints the project version supplied by Gradle. */
 class VersionCommand : JsonCommand(help = "Prints ktools version") {
