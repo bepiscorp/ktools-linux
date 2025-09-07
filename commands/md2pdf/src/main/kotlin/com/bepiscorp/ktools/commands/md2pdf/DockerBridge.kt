@@ -213,6 +213,7 @@ class DockerBridge {
                 .waitFor()
 
             // Copy input file into container
+            // See https://docs.docker.com/engine/reference/commandline/cp/
             val copyIn = ProcessBuilder(
                 "docker",
                 "cp",
