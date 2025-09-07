@@ -2,6 +2,34 @@ package com.bepiscorp.ktools.commands.md2pdf
 
 import kotlinx.serialization.Serializable
 import java.io.File
+import java.nio.file.Path
+import kotlin.io.path.Path
+
+/** Output destination for md2pdf conversion. */
+sealed class OutputDestination {
+    /** Write output to stdout. */
+    object Stdout : OutputDestination()
+
+    /** Write output to a file. */
+    data class FileOutput(
+        val path: Path
+    ) : OutputDestination() {
+        constructor(file: File) : this(file.toPath())
+        constructor(pathString: String) : this(Path(pathString))
+
+        fun toFile(): File = path.toFile()
+    }
+
+    companion object {
+        /** Parse a string into an OutputDestination. */
+        fun parse(value: String?): OutputDestination? =
+            when (value) {
+                null -> null
+                "-" -> Stdout
+                else -> FileOutput(value)
+            }
+    }
+}
 
 /** Configuration options for md2pdf conversion. */
 data class Md2PdfOptions(

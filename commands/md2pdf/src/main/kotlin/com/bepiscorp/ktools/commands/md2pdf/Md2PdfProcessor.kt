@@ -414,14 +414,30 @@ class Md2PdfProcessor(
         )
     }
 
-    private fun determineOutputFile(input: InputFile, options: Md2PdfOptions): File {
+    private fun determineOutputDestination(input: InputFile, options: Md2PdfOptions): OutputDestination {
         return when {
-            options.output != null -> options.output
-            options.outputPattern != null -> resolveOutputPattern(input, options.outputPattern)
-            options.outputDir != null -> File(options.outputDir, changeExtension(input.name, "pdf"))
-            else -> File(changeExtension(input.path, "pdf"))
+            options.output != null -> {
+                if (options.output.path == "-") {
+                    OutputDestination.Stdout
+                } else {
+                    OutputDestination.FileOutput(options.output)
+                }
+            }
+            options.outputPattern != null -> OutputDestination.FileOutput(
+                resolveOutputPattern(input, options.outputPattern)
+            )
+            options.outputDir != null -> OutputDestination.FileOutput(
+                File(options.outputDir, changeExtension(input.name, "pdf"))
+            )
+            else -> OutputDestination.FileOutput(changeExtension(input.path, "pdf"))
         }
     }
+
+    private fun determineOutputFile(input: InputFile, options: Md2PdfOptions): File =
+        when (val destination = determineOutputDestination(input, options)) {
+            is OutputDestination.Stdout -> File("-") // Legacy compatibility for engines that check path
+            is OutputDestination.FileOutput -> destination.toFile()
+        }
 
     private fun resolveOutputPattern(input: InputFile, pattern: String): File {
         val inputFile = when (input) {

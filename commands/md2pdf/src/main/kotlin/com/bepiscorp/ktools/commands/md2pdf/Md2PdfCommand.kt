@@ -157,16 +157,27 @@ class Md2PdfCommand :
                         }
                     }
 
-                    respond(
-                        Md2PdfResponse(
-                            success = result.success,
-                            message = result.message,
-                            engine = result.engine,
-                            conversions = result.conversions
-                        ),
-                        Md2PdfResponse.serializer(),
-                        if (result.success) result.message else "Conversion failed: ${result.message}"
-                    )
+                    // Check if we're using stdout for output - if so, don't echo anything
+                    val isStdoutOutput = output?.path == "-"
+
+                    if (!isStdoutOutput) {
+                        respond(
+                            Md2PdfResponse(
+                                success = result.success,
+                                message = result.message,
+                                engine = result.engine,
+                                conversions = result.conversions
+                            ),
+                            Md2PdfResponse.serializer(),
+                            if (result.success) result.message else "Conversion failed: ${result.message}"
+                        )
+                    } else {
+                        // For stdout output, only set exit code - no text output to avoid contaminating PDF
+                        if (!result.success) {
+                            // Still log errors to stderr, but don't echo to stdout
+                            throw RuntimeException(result.message)
+                        }
+                    }
 
                     if (!result.success) {
                         kotlin.system.exitProcess(result.exitCode)

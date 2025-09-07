@@ -12,10 +12,12 @@ import kotlinx.serialization.json.JsonPrimitive
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 /** Bridge to the Node.js md2pdf library. */
 class NodeBridge {
 
+    private val log = KotlinLogging.logger {}
     private val workspaceDir = File(System.getProperty("java.io.tmpdir"), "ktools-md2pdf")
     private val md2pdfDir = File(workspaceDir, "md2pdf")
     private val bridgeScript = File(md2pdfDir, "bridge.js")
@@ -103,13 +105,22 @@ class NodeBridge {
     }
 
     private suspend fun ensureMd2PdfInstalled() {
-        if (!File(md2pdfDir, "node_modules/md-to-pdf").exists()) {
+        val md2pdfModule = File(md2pdfDir, "node_modules/md-to-pdf")
+        log.debug { "Checking md-to-pdf at: ${md2pdfModule.absolutePath}" }
+        log.debug { "md2pdfDir exists: ${md2pdfDir.exists()}" }
+        log.debug { "md-to-pdf module exists: ${md2pdfModule.exists()}" }
+
+        if (!md2pdfModule.exists()) {
+            log.debug { "Installing md-to-pdf package..." }
             installMd2Pdf()
         }
     }
 
     private suspend fun installMd2Pdf(): Unit =
         withContext(Dispatchers.IO) {
+            log.debug { "Starting md-to-pdf installation..." }
+            log.debug { "Workspace dir: ${workspaceDir.absolutePath}" }
+            log.debug { "md2pdf dir: ${md2pdfDir.absolutePath}" }
             // Create package.json for md2pdf installation
             if (!md2pdfDir.exists()) {
                 md2pdfDir.mkdirs()
@@ -146,6 +157,8 @@ class NodeBridge {
             }
 
             // Run npm install (respect nvm if available)
+            log.debug { "Running npm install with executable: $npmExecutable" }
+            log.debug { "Working directory: ${md2pdfDir.absolutePath}" }
             val process = ProcessBuilder(npmExecutable, "install")
                 .directory(md2pdfDir)
                 .redirectErrorStream(true)
@@ -158,7 +171,10 @@ class NodeBridge {
                 throw RuntimeException("npm install timed out")
             }
 
-            if (process.exitValue() != 0) {
+            val exitCode = process.exitValue()
+            log.debug { "npm install exit code: $exitCode" }
+
+            if (exitCode != 0) {
                 val output = process.inputStream.bufferedReader().readText()
                 throw RuntimeException("npm install failed: $output")
             }
@@ -167,25 +183,49 @@ class NodeBridge {
     private suspend fun executeConversion(inputFile: File, options: Map<String, Any>): Boolean =
         withContext(Dispatchers.IO) {
             val optionsJson = Json.encodeToString(toJsonObject(options))
+            val isStdoutOutput = options["output"]?.toString() == "-"
 
-            val process = ProcessBuilder(
+            val processBuilder = ProcessBuilder(
                 nodeExecutable,
                 bridgeScript.absolutePath,
                 inputFile.absolutePath,
                 optionsJson
-            ).redirectErrorStream(true)
-                .start()
+            )
+
+            // For stdout output, we need to handle streams differently
+            if (isStdoutOutput) {
+                // Redirect stdout to inherit (pass through to main process stdout)
+                // and stderr to inherit (pass through to main process stderr)
+                processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT)
+            } else {
+                // For file output, we can safely redirect error stream
+                processBuilder.redirectErrorStream(true)
+            }
+
+            log.debug {
+                "Starting Node.js process: $nodeExecutable ${bridgeScript.absolutePath} ${inputFile.absolutePath} [options]"
+            }
+            val process = processBuilder.start()
 
             val timeoutSeconds = (options["timeout"] as? Int) ?: 60
-            val completed = withTimeout(timeoutSeconds.seconds) {
+            log.debug { "Waiting for process completion (timeout: ${timeoutSeconds}s)..." }
+            
+            withTimeout(timeoutSeconds.seconds) {
                 process.waitFor()
             }
 
-            val output = process.inputStream.bufferedReader().readText()
             val exitCode = process.exitValue()
 
             if (exitCode != 0) {
-                throw RuntimeException("Node.js conversion failed: $output")
+                // For stdout output, error messages are already on stderr
+                // For file output, we can read the error stream
+                val errorOutput = if (!isStdoutOutput) {
+                    process.inputStream.bufferedReader().readText()
+                } else {
+                    "Process failed with exit code $exitCode"
+                }
+                throw RuntimeException("Node.js conversion failed: $errorOutput")
             }
 
             return@withContext true

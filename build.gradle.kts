@@ -29,9 +29,10 @@ subprojects {
         add("implementation", "com.typesafe:config:1.4.3")
         add("implementation", "io.github.config4k:config4k:0.4.2")
 
-        // Logging facade and simple backend
+        // Logging facade and Log4j2 backend
         add("implementation", "io.github.oshai:kotlin-logging-jvm:7.0.3")
-        add("runtimeOnly", "org.slf4j:slf4j-simple:2.0.3")
+        add("implementation", "org.apache.logging.log4j:log4j-core:2.21.1")
+        add("implementation", "org.apache.logging.log4j:log4j-slf4j2-impl:2.21.1")
 
         add("testImplementation", kotlin("test"))
         add("testImplementation", "io.kotest:kotest-runner-junit5:5.9.1")
