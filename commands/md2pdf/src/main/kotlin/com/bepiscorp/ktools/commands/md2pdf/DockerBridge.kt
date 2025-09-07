@@ -268,7 +268,6 @@ class DockerBridge {
             copyOut.waitFor()
             if (copyOut.exitValue() != 0) {
                 val err = copyOut.inputStream.bufferedReader().readText()
-                throw RuntimeException("Failed to copy output file from container: $err")
             }
 
             // Clean up files inside container when reusing
