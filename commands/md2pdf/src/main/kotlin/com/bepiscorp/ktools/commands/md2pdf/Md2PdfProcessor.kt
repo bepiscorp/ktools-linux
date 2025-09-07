@@ -73,6 +73,7 @@ class Md2PdfProcessor(
 
     /** Convert markdown files according to the options. */
     fun convert(options: Md2PdfOptions): ProcessingResult {
+        var engineName = engine
         return try {
             // Validate options
             validateOptions(options)
@@ -82,6 +83,8 @@ class Md2PdfProcessor(
 
             // Select and initialize engine
             val engineInfo = selectEngine()
+            activeEngine = engineInfo
+            engineName = engineInfo.name
             if (!quiet) log.info { "Using ${engineInfo.name} mode" }
 
             // Process inputs
@@ -132,7 +135,7 @@ class Md2PdfProcessor(
             ProcessingResult(
                 success = false,
                 message = e.message ?: "Validation failed",
-                engine = getActiveEngine(),
+                engine = engineName,
                 exitCode = 1,
                 hint = e.hint
             )
@@ -140,7 +143,7 @@ class Md2PdfProcessor(
             ProcessingResult(
                 success = false,
                 message = e.message ?: "Engine error",
-                engine = getActiveEngine(),
+                engine = engineName,
                 exitCode = e.exitCode,
                 hint = e.hint
             )
@@ -149,7 +152,7 @@ class Md2PdfProcessor(
             ProcessingResult(
                 success = false,
                 message = "Unexpected error: ${e.message}",
-                engine = getActiveEngine(),
+                engine = engineName,
                 exitCode = 2,
                 hint = "Run with --verbose for more details"
             )

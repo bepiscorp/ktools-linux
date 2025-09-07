@@ -37,7 +37,7 @@ class DockerBridge {
                     is InputFile.Remote -> downloadContent(input.url)
                 }
 
-                // Create temporary files for Docker volume mounts
+                // Create temporary files for Docker transfer
                 val tempDir = Files.createTempDirectory("ktools-md2pdf").toFile()
                 val inputFile = File(tempDir, "input.md")
                 val outputFile = File(tempDir, "output.pdf")
@@ -46,7 +46,7 @@ class DockerBridge {
                     inputFile.writeText(inputContent)
 
                     // Execute conversion via Docker
-                    val success = executeDockerConversion(containerId, tempDir, inputFile, outputFile, options)
+                    val success = executeDockerConversion(containerId, inputFile, outputFile, options)
 
                     if (success && outputFile.exists()) {
                         if (output.path == "-") {
@@ -201,20 +201,37 @@ class DockerBridge {
 
     private suspend fun executeDockerConversion(
         containerId: String,
-        tempDir: File,
         inputFile: File,
         outputFile: File,
         options: Map<String, Any>
     ): Boolean =
         withContext(Dispatchers.IO) {
+            // Ensure workspace exists inside container
+            ProcessBuilder("docker", "exec", containerId, "mkdir", "-p", "/workspace")
+                .redirectErrorStream(true)
+                .start()
+                .waitFor()
+
+            // Copy input file into container
+            val copyIn = ProcessBuilder(
+                "docker",
+                "cp",
+                inputFile.absolutePath,
+                "$containerId:/workspace/${inputFile.name}"
+            ).redirectErrorStream(true).start()
+            copyIn.waitFor()
+            if (copyIn.exitValue() != 0) {
+                val output = copyIn.inputStream.bufferedReader().readText()
+                throw RuntimeException("Failed to copy input file to container: $output")
+            }
+
             // Build conversion command
             val command = buildMd2PdfCommand(inputFile.name, outputFile.name, options)
             val dockerCommand = mutableListOf(
                 "docker", "exec",
                 "-w", "/workspace",
-                "-v", "${tempDir.absolutePath}:/workspace"
+                containerId
             )
-            dockerCommand.add(containerId)
             dockerCommand.addAll(command)
 
             // Execute conversion
@@ -223,7 +240,7 @@ class DockerBridge {
                 .start()
 
             val timeoutSeconds = (options["timeout"] as? Int) ?: 60
-            val completed = withTimeout(timeoutSeconds.seconds) {
+            withTimeout(timeoutSeconds.seconds) {
                 process.waitFor()
             }
 
@@ -233,6 +250,30 @@ class DockerBridge {
             if (exitCode != 0) {
                 throw RuntimeException("Docker md2pdf conversion failed: $output")
             }
+
+            // Copy output file back to host
+            val copyOut = ProcessBuilder(
+                "docker",
+                "cp",
+                "$containerId:/workspace/${outputFile.name}",
+                outputFile.absolutePath
+            ).redirectErrorStream(true).start()
+            copyOut.waitFor()
+            if (copyOut.exitValue() != 0) {
+                val err = copyOut.inputStream.bufferedReader().readText()
+                throw RuntimeException("Failed to copy output file from container: $err")
+            }
+
+            // Clean up files inside container when reusing
+            ProcessBuilder(
+                "docker",
+                "exec",
+                containerId,
+                "rm",
+                "-f",
+                "/workspace/${inputFile.name}",
+                "/workspace/${outputFile.name}"
+            ).redirectErrorStream(true).start().waitFor()
 
             return@withContext outputFile.exists()
         }
