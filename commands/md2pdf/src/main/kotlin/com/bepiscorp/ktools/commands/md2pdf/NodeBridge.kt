@@ -210,7 +210,7 @@ class NodeBridge {
 
             val timeoutSeconds = (options["timeout"] as? Int) ?: 60
             log.debug { "Waiting for process completion (timeout: ${timeoutSeconds}s)..." }
-            
+
             withTimeout(timeoutSeconds.seconds) {
                 process.waitFor()
             }
