@@ -20,9 +20,13 @@ class NodeBridge {
     private val md2pdfDir = File(workspaceDir, "md2pdf")
     private val bridgeScript = File(md2pdfDir, "bridge.js")
     private val nvmBin: String? = System.getenv("NVM_BIN")
-    private val nodeExecutable: String = nvmBin?.let { File(it, "node") }?.takeIf { it.exists() && it.canExecute() }?.absolutePath
+    private val nodeExecutable: String = nvmBin?.let {
+        File(it, "node")
+    }?.takeIf { it.exists() && it.canExecute() }?.absolutePath
         ?: "node"
-    private val npmExecutable: String = nvmBin?.let { File(it, "npm") }?.takeIf { it.exists() && it.canExecute() }?.absolutePath
+    private val npmExecutable: String = nvmBin?.let {
+        File(it, "npm")
+    }?.takeIf { it.exists() && it.canExecute() }?.absolutePath
         ?: "npm"
 
     init {

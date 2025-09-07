@@ -13,3 +13,5 @@
 - 🚧 Future plugin system using ServiceLoader for dynamic command loading
 - ✅ Rename package prefix to `com.bepiscorp.ktools` and set Gradle group
 - ✅ Add AGENTS.md with LLM contributor guidelines
+- ✅ Fix DockerBridge to copy files instead of invalid volume mount and cache engine name
+- ✅ Document docker cp usage for md2pdf Docker mode
