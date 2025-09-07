@@ -46,7 +46,7 @@ class DockerBridge {
                     inputFile.writeText(inputContent)
 
                     // Execute conversion via Docker
-                    val success = executeDockerConversion(containerId, tempDir, inputFile, outputFile, options)
+                    val success = executeDockerConversion(containerId, inputFile, outputFile, options)
 
                     if (success && outputFile.exists()) {
                         if (output.path == "-") {
@@ -201,20 +201,35 @@ class DockerBridge {
 
     private suspend fun executeDockerConversion(
         containerId: String,
-        tempDir: File,
         inputFile: File,
         outputFile: File,
         options: Map<String, Any>
     ): Boolean =
         withContext(Dispatchers.IO) {
+            // Copy input file into container
+            val copyIn = ProcessBuilder(
+                "docker",
+                "cp",
+                inputFile.absolutePath,
+                "$containerId:/workspace/${inputFile.name}"
+            ).redirectErrorStream(true)
+                .start()
+
+            copyIn.waitFor()
+            if (copyIn.exitValue() != 0) {
+                val err = copyIn.inputStream.bufferedReader().readText()
+                throw RuntimeException("Failed to copy input into container: $err")
+            }
+
             // Build conversion command
             val command = buildMd2PdfCommand(inputFile.name, outputFile.name, options)
             val dockerCommand = mutableListOf(
-                "docker", "exec",
-                "-w", "/workspace",
-                "-v", "${tempDir.absolutePath}:/workspace"
+                "docker",
+                "exec",
+                "-w",
+                "/workspace",
+                containerId
             )
-            dockerCommand.add(containerId)
             dockerCommand.addAll(command)
 
             // Execute conversion
@@ -232,6 +247,21 @@ class DockerBridge {
 
             if (exitCode != 0) {
                 throw RuntimeException("Docker md2pdf conversion failed: $output")
+            }
+
+            // Copy output file back to host
+            val copyOut = ProcessBuilder(
+                "docker",
+                "cp",
+                "$containerId:/workspace/${outputFile.name}",
+                outputFile.absolutePath
+            ).redirectErrorStream(true)
+                .start()
+
+            copyOut.waitFor()
+            if (copyOut.exitValue() != 0) {
+                val err = copyOut.inputStream.bufferedReader().readText()
+                throw RuntimeException("Failed to copy output from container: $err")
             }
 
             return@withContext outputFile.exists()
