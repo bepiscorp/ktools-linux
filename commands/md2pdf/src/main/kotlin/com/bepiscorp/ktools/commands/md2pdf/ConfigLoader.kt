@@ -103,7 +103,7 @@ themes {
     font-family = "serif"
   }
 }
-            """.trimIndent()
+        """.trimIndent()
     }
 
     private fun Config.getOptionalString(path: String): String? {

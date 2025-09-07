@@ -60,7 +60,6 @@ spotless {
         target("**/*.kt")
         ktlint("1.2.1").editorConfigOverride(
             mapOf(
-                "ktlint_code_style" to "google",
                 "ij_kotlin_allow_trailing_comma" to "true",
             ),
         )
