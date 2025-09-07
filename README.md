@@ -7,6 +7,7 @@ Modular Kotlin CLI tools for Linux with git-style subcommands.
 ## 🔧 Setup
 
 - ⬇️ Clone the repo
+- 📦 Install Node.js 20+ (needed for markdown formatting)
 - 🏗️ Run `./gradlew build`
 
 ## 🧪 Testing

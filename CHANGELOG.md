@@ -3,6 +3,7 @@
 ## Unreleased
 
 - 🔄 Add GitHub CI pipeline with build, test, integration test, and publish phases
+- 🐛 Fix CI markdown lint failures by installing Node
 
 ## 0.1.1
 

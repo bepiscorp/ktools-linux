@@ -70,18 +70,22 @@ spotless {
     }
     format("markdown") {
         target("**/*.md")
-        // Prefer nvm-managed node if available, otherwise let Spotless auto-detect
-        val nvmNode =
-            System.getenv("NVM_BIN")?.let { bin ->
-                val candidate = java.io.File(bin, "node")
-                if (candidate.exists() && candidate.canExecute()) candidate.absolutePath else null
-            }
-        if (nvmNode != null) {
-            prettier().nodeExecutable(nvmNode).config(mapOf("parser" to "markdown"))
-        } else {
-            prettier().nodeExecutable(
-                "/usr/bin/node",
-            ).npmExecutable("/usr/bin/npm").config(mapOf("parser" to "markdown"))
+
+        // Prefer nvm-managed node/npm if available, otherwise resolve from PATH
+        fun findExec(name: String): String? =
+            System.getenv("PATH")?.split(java.io.File.pathSeparatorChar)?.asSequence()
+                ?.map { java.io.File(it, name) }?.firstOrNull { it.exists() && it.canExecute() }
+                ?.absolutePath
+        val nvmBin = System.getenv("NVM_BIN")?.let { java.io.File(it) }
+        val nodeExec =
+            nvmBin?.resolve("node")?.takeIf { it.exists() && it.canExecute() }?.absolutePath
+                ?: findExec("node")
+        val npmExec =
+            nvmBin?.resolve("npm")?.takeIf { it.exists() && it.canExecute() }?.absolutePath
+                ?: findExec("npm")
+        val step = prettier().config(mapOf("parser" to "markdown"))
+        if (nodeExec != null && npmExec != null) {
+            step.nodeExecutable(nodeExec).npmExecutable(npmExec)
         }
     }
 }
