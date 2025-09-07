@@ -15,3 +15,4 @@
 - ✅ Add AGENTS.md with LLM contributor guidelines
 - ✅ Fix DockerBridge to copy files instead of invalid volume mount and cache engine name
 - ✅ Document docker cp usage for md2pdf Docker mode
+- ✅ Add GitHub CI pipeline with build, test, integration test, and publish phases

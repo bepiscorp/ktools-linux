@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.SourceSetContainer
+
 plugins {
     kotlin("jvm") version "2.0.20" apply false
     kotlin("plugin.serialization") version "2.0.20" apply false
@@ -43,6 +45,15 @@ subprojects {
     tasks.withType<Test> {
         useJUnitPlatform()
     }
+
+    val sourceSets = extensions.getByType<SourceSetContainer>()
+    tasks.register<Test>("integrationTest") {
+        description = "Runs integration tests."
+        group = "verification"
+        testClassesDirs = sourceSets["test"].output.classesDirs
+        classpath = sourceSets["test"].runtimeClasspath
+    }
+    tasks.named("check") { dependsOn("integrationTest") }
 }
 
 spotless {
@@ -50,7 +61,6 @@ spotless {
         target("**/*.kt")
         ktlint("1.2.1").editorConfigOverride(
             mapOf(
-                "ktlint_code_style" to "google",
                 "ij_kotlin_allow_trailing_comma" to "true",
             ),
         )
@@ -60,16 +70,22 @@ spotless {
     }
     format("markdown") {
         target("**/*.md")
-        // Prefer nvm-managed node if available, otherwise let Spotless auto-detect
-        val nvmNode =
-            System.getenv("NVM_BIN")?.let { bin ->
-                val candidate = java.io.File(bin, "node")
-                if (candidate.exists() && candidate.canExecute()) candidate.absolutePath else null
-            }
-        if (nvmNode != null) {
-            prettier().nodeExecutable(nvmNode).config(mapOf("parser" to "markdown"))
-        } else {
-            prettier().config(mapOf("parser" to "markdown"))
+
+        // Prefer nvm-managed node/npm if available, otherwise resolve from PATH
+        fun findExec(name: String): String? =
+            System.getenv("PATH")?.split(java.io.File.pathSeparatorChar)?.asSequence()
+                ?.map { java.io.File(it, name) }?.firstOrNull { it.exists() && it.canExecute() }
+                ?.absolutePath
+        val nvmBin = System.getenv("NVM_BIN")?.let { java.io.File(it) }
+        val nodeExec =
+            nvmBin?.resolve("node")?.takeIf { it.exists() && it.canExecute() }?.absolutePath
+                ?: findExec("node")
+        val npmExec =
+            nvmBin?.resolve("npm")?.takeIf { it.exists() && it.canExecute() }?.absolutePath
+                ?: findExec("npm")
+        val step = prettier().config(mapOf("parser" to "markdown"))
+        if (nodeExec != null && npmExec != null) {
+            step.nodeExecutable(nodeExec).npmExecutable(npmExec)
         }
     }
 }
