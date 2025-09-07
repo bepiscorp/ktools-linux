@@ -83,8 +83,8 @@ class Md2PdfProcessor(
 
             // Select and initialize engine
             val engineInfo = selectEngine()
-            activeEngine = engineInfo
             engineName = engineInfo.name
+            activeEngine = engineInfo
             if (!quiet) log.info { "Using ${engineInfo.name} mode" }
 
             // Process inputs

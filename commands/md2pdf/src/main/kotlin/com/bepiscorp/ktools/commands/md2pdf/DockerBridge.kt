@@ -219,18 +219,22 @@ class DockerBridge {
                 "cp",
                 inputFile.absolutePath,
                 "$containerId:/workspace/${inputFile.name}"
-            ).redirectErrorStream(true).start()
+            ).redirectErrorStream(true)
+                .start()
+
             copyIn.waitFor()
             if (copyIn.exitValue() != 0) {
-                val output = copyIn.inputStream.bufferedReader().readText()
-                throw RuntimeException("Failed to copy input file to container: $output")
+                val err = copyIn.inputStream.bufferedReader().readText()
+                throw RuntimeException("Failed to copy input file to container: $err")
             }
 
             // Build conversion command
             val command = buildMd2PdfCommand(inputFile.name, outputFile.name, options)
             val dockerCommand = mutableListOf(
-                "docker", "exec",
-                "-w", "/workspace",
+                "docker",
+                "exec",
+                "-w",
+                "/workspace",
                 containerId
             )
             dockerCommand.addAll(command)
@@ -257,8 +261,10 @@ class DockerBridge {
                 "docker",
                 "cp",
                 "$containerId:/workspace/${outputFile.name}",
-                outputFile.absolutePath
-            ).redirectErrorStream(true).start()
+                outputFile.absolutePath,
+            ).redirectErrorStream(true)
+                .start()
+
             copyOut.waitFor()
             if (copyOut.exitValue() != 0) {
                 val err = copyOut.inputStream.bufferedReader().readText()
