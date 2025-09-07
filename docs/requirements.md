@@ -38,8 +38,6 @@ The initial scaffold requirements are merged into the Functional and Non-Functio
 - SFR-7 — JSON output: All commands support `--json` via kotlinx.serialization.
 - SFR-8 — Extensibility: Architecture prepared for future plugin loading (e.g., ServiceLoader discovery placeholder).
 
- 
-
 ### 🧪 Non-Functional Requirements
 
 - NFR-1 — Cross-platform: macOS, Linux, Windows via Gradle. Path normalization and quoting are documented and tested.

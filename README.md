@@ -13,6 +13,10 @@ Modular Kotlin CLI tools for Linux with git-style subcommands.
 
 - ✅ `./gradlew test`
 
+## 🔄 CI
+
+- 🏗️ Build, test, integration test, and publish via GitHub Actions
+
 ## 📚 Documentation
 
 See [docs](docs/index.md) for full details. Product and integration specs live in [docs/requirements.md](docs/requirements.md).

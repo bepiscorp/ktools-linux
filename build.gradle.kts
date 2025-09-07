@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.SourceSetContainer
+
 plugins {
     kotlin("jvm") version "2.0.20" apply false
     kotlin("plugin.serialization") version "2.0.20" apply false
@@ -42,6 +44,15 @@ subprojects {
     tasks.withType<Test> {
         useJUnitPlatform()
     }
+
+    val sourceSets = extensions.getByType<SourceSetContainer>()
+    tasks.register<Test>("integrationTest") {
+        description = "Runs integration tests."
+        group = "verification"
+        testClassesDirs = sourceSets["test"].output.classesDirs
+        classpath = sourceSets["test"].runtimeClasspath
+    }
+    tasks.named("check") { dependsOn("integrationTest") }
 }
 
 spotless {
@@ -68,7 +79,9 @@ spotless {
         if (nvmNode != null) {
             prettier().nodeExecutable(nvmNode).config(mapOf("parser" to "markdown"))
         } else {
-            prettier().config(mapOf("parser" to "markdown"))
+            prettier().nodeExecutable(
+                "/usr/bin/node",
+            ).npmExecutable("/usr/bin/npm").config(mapOf("parser" to "markdown"))
         }
     }
 }
