@@ -1,0 +1,9 @@
+.patches/
+.venv/
+
+.gradle/
+**/build/
+.idea/
+node_modules/
+.kotlin/
+site/

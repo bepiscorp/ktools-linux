@@ -1,0 +1,15 @@
+site_name: ktools-linux
+nav:
+  - Home: index.md
+  - Requirements: requirements.md
+  - Contributing: contributing.md
+  - Coding Style: coding-style.md
+  - Commands: commands.md
+  - Adding Commands: adding-command.md
+markdown_extensions:
+  - admonition
+  - toc
+  - pymdownx.superfences
+plugins:
+  - search
+  - mermaid2

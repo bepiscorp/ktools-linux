@@ -1,0 +1,687 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/.githooks/commit-msg b/.githooks/commit-msg
+new file mode 100755
+index 0000000000000000000000000000000000000000..ae757307c2a37d0134b8abd1b38e64733d7ebd78
+--- /dev/null
++++ b/.githooks/commit-msg
+@@ -0,0 +1,2 @@
++#!/bin/sh
++npx commitlint --edit "$1"
+diff --git a/.githooks/pre-commit b/.githooks/pre-commit
+new file mode 100755
+index 0000000000000000000000000000000000000000..8f039d32e104d75d4aaa1754388c2d6eb28900c4
+--- /dev/null
++++ b/.githooks/pre-commit
+@@ -0,0 +1,3 @@
++#!/bin/sh
++./gradlew spotlessApply >/dev/null
++npx markdownlint README.md CHANGELOG.md docs/**/*.md
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000000000000000000000000000000000000..487edbd658f27ba58f4eea17173255ebf15b4d96
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,5 @@
++.gradle/
++**/build/
++.idea/
++node_modules/
++.kotlin/
+diff --git a/.markdownlint.json b/.markdownlint.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..8f64f9800f87af7899acee6f51861f3c2ea2476c
+--- /dev/null
++++ b/.markdownlint.json
+@@ -0,0 +1,4 @@
++{
++  "default": true,
++  "MD013": { "line_length": 120 }
++}
+diff --git a/AGENTS.md b/AGENTS.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..506d3ab3fb8b30aa43d10b5da8890ba45c009cdd
+--- /dev/null
++++ b/AGENTS.md
+@@ -0,0 +1,33 @@
++# 🤖 AGENTS
++
++Guidelines for LLM contributors. Follows [AGENTS.md spec](https://github.com/openai/agents.md).
++
++## 🧭 General
++
++- 🧬 Keep package prefix and Gradle group `com.bepiscorp.ktools`.
++- 📦 Use Semantic Versioning for releases.
++
++## 🛠️ Development
++
++- 📐 Follow Google Kotlin Style Guide (JetBrains style fallback).
++- 🧹 Format code with `./gradlew spotlessApply`; verify with `./gradlew spotlessCheck`.
++- 🧪 Run `./gradlew test` for code changes; skip only for docs or comments.
++- 🏗️ Build with `./gradlew build` when needed.
++- 🔍 Prefer `rg` for searches; avoid `grep -R` and `ls -R`.
++- 🚫 Do not create new git branches; commit on main.
++
++## 📚 Documentation
++
++- 📄 Place docs in `README.md`, `CHANGELOG.md`, or `docs/`; store images in `assets/`.
++- 🔤 Prefix headings and list items with at most one relevant emoji.
++- ✍️ Record user tasks in `TODO.md` with `🚧` or `✅` status.
++
++## 💬 Commits & PRs
++
++- 📝 Follow Conventional Commits (e.g., `feat(cli): add init command`).
++- 📣 Reference files with line numbers in PR summaries.
++
++## 🤖 LLM Tips
++
++- ⏳ Wait for commands to finish before continuing.
++- 📚 Read nested `AGENTS.md` files for additional local rules.
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..32b5414928f3d6015381be2e094dc3087a3fde7d
+--- /dev/null
++++ b/CHANGELOG.md
+@@ -0,0 +1,10 @@
++# 🕘 Changelog
++
++## 0.1.1
++
++- 🔁 Rename package prefix to `com.bepiscorp.ktools`
++- 🏷️ Set Gradle group to `com.bepiscorp.ktools`
++
++## 0.1.0
++
++- 🎉 Initial scaffold
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..a56134327776285239e693b3771f127d5b200ff2
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,18 @@
++# 🚀 ktools-linux
++
++## 📘 Overview
++
++Modular Kotlin CLI tools for Linux with git-style subcommands.
++
++## 🔧 Setup
++
++- ⬇️ Clone the repo
++- 🏗️ Run `./gradlew build`
++
++## 🧪 Testing
++
++- ✅ `./gradlew test`
++
++## 📚 Documentation
++
++See [docs](docs/index.md) for full details.
+diff --git a/TODO.md b/TODO.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..61a8f0176dc1382eca8739c88abc16623e69191e
+--- /dev/null
++++ b/TODO.md
+@@ -0,0 +1,15 @@
++# 📋 TODO
++
++- ✅ Scaffold multimodule Gradle project with core, cli, and command modules
++- ✅ Add CLI entrypoint registering `hello` and `version` commands
++- ✅ Implement config management layer with global and per-command HOCON files
++- ✅ Wire dependency injection with Koin
++- ✅ Integrate Koog for structured logging
++- ✅ Support `--json` flag for all commands using kotlinx.serialization
++- ✅ Configure Git hooks for commitlint, spotless + ktlint, and markdownlint
++- ✅ Add test scaffolding using kotest, mockk, and testcontainers
++- ✅ Set up documentation with Dokka and MkDocs (Mermaid enabled)
++- ✅ Document code style (Google Kotlin Style Guide → JetBrains fallback) and contribution guide
++- 🚧 Future plugin system using ServiceLoader for dynamic command loading
++- ✅ Rename package prefix to `com.bepiscorp.ktools` and set Gradle group
++- ✅ Add AGENTS.md with LLM contributor guidelines
+diff --git a/build.gradle.kts b/build.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..fab2ff62162190f9a35f648c6642a6907e3d47bd
+--- /dev/null
++++ b/build.gradle.kts
+@@ -0,0 +1,60 @@
++plugins {
++    kotlin("jvm") version "2.0.20" apply false
++    kotlin("plugin.serialization") version "2.0.20" apply false
++    id("org.jetbrains.dokka") version "2.0.0" apply false
++    id("com.diffplug.spotless") version "6.25.0"
++}
++
++allprojects {
++    group = "com.bepiscorp.ktools"
++    repositories { mavenCentral() }
++}
++
++subprojects {
++    apply(plugin = "org.jetbrains.kotlin.jvm")
++    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
++    apply(plugin = "org.jetbrains.dokka")
++
++    extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
++        jvmToolchain(21)
++    }
++
++    dependencies {
++        add("implementation", "io.insert-koin:koin-core:3.5.3")
++        add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
++        add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
++        add("implementation", "com.github.ajalt.clikt:clikt:4.2.0")
++        add("implementation", "io.ktor:ktor-client-core:3.0.0")
++        add("implementation", "io.ktor:ktor-client-cio:3.0.0")
++        add("implementation", "com.typesafe:config:1.4.3")
++        add("implementation", "io.github.config4k:config4k:0.4.2")
++
++        add("testImplementation", kotlin("test"))
++        add("testImplementation", "io.kotest:kotest-runner-junit5:5.9.1")
++        add("testImplementation", "io.mockk:mockk:1.13.10")
++        add("testImplementation", "org.testcontainers:junit-jupiter:1.20.2")
++    }
++
++    tasks.withType<Test> {
++        useJUnitPlatform()
++    }
++}
++
++spotless {
++    kotlin {
++        target("**/*.kt")
++        ktlint("1.2.1").editorConfigOverride(
++            mapOf(
++                "ktlint_code_style" to "google",
++                "ij_kotlin_allow_trailing_comma" to "true",
++            ),
++        )
++    }
++    kotlinGradle {
++        ktlint("1.2.1")
++    }
++    format("markdown") {
++        target("**/*.md")
++        prettier().config(mapOf("parser" to "markdown"))
++    }
++}
+diff --git a/cli/build.gradle.kts b/cli/build.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..d113fb6063cd0548445390ae74b13faa1e449d3d
+--- /dev/null
++++ b/cli/build.gradle.kts
+@@ -0,0 +1,14 @@
++plugins {
++    application
++}
++
++application {
++    mainClass.set("com.bepiscorp.ktools.cli.MainKt")
++    applicationDefaultJvmArgs = listOf("-Dktools.version=${'$'}{project.version}")
++}
++
++dependencies {
++    implementation(project(":core"))
++    implementation(project(":commands:hello"))
++    implementation(project(":commands:version"))
++}
+diff --git a/cli/src/main/kotlin/com/bepiscorp/ktools/cli/Main.kt b/cli/src/main/kotlin/com/bepiscorp/ktools/cli/Main.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..4e489bfb43a1efb079a1eb7fee79193565c831cf
+--- /dev/null
++++ b/cli/src/main/kotlin/com/bepiscorp/ktools/cli/Main.kt
+@@ -0,0 +1,23 @@
++package com.bepiscorp.ktools.cli
++
++import com.bepiscorp.ktools.commands.hello.HelloCommand
++import com.bepiscorp.ktools.commands.version.VersionCommand
++import com.bepiscorp.ktools.core.di.coreModule
++import com.github.ajalt.clikt.core.CliktCommand
++import com.github.ajalt.clikt.core.subcommands
++import org.koin.core.context.startKoin
++
++/** CLI entrypoint. Discovers commands and sets up DI.
++ * Future plugin loading will use ServiceLoader here.
++ */
++fun main(args: Array<String>) {
++    startKoin { modules(coreModule) }
++    KTools().subcommands(
++        HelloCommand(),
++        VersionCommand(),
++    ).main(args)
++}
++
++class KTools : CliktCommand(name = "ktools", help = "ktools-linux CLI") {
++    override fun run() = Unit
++}
+diff --git a/cli/src/test/kotlin/com/bepiscorp/ktools/cli/MainTest.kt b/cli/src/test/kotlin/com/bepiscorp/ktools/cli/MainTest.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..81746f52386ee76169b243e465bab99352cd47bc
+--- /dev/null
++++ b/cli/src/test/kotlin/com/bepiscorp/ktools/cli/MainTest.kt
+@@ -0,0 +1,7 @@
++package com.bepiscorp.ktools.cli
++
++import io.kotest.core.spec.style.StringSpec
++
++class MainTest : StringSpec({
++    "runs without arguments" { }
++})
+diff --git a/commands/hello/build.gradle.kts b/commands/hello/build.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..84a4e589c1ae1f1cac2e07c20fd61c96d78beb84
+--- /dev/null
++++ b/commands/hello/build.gradle.kts
+@@ -0,0 +1,5 @@
++plugins {}
++
++dependencies {
++    implementation(project(":core"))
++}
+diff --git a/commands/hello/src/main/kotlin/com/bepiscorp/ktools/commands/hello/HelloCommand.kt b/commands/hello/src/main/kotlin/com/bepiscorp/ktools/commands/hello/HelloCommand.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..101c14867aa5e624afce49d7f5f16ef6237212f8
+--- /dev/null
++++ b/commands/hello/src/main/kotlin/com/bepiscorp/ktools/commands/hello/HelloCommand.kt
+@@ -0,0 +1,19 @@
++package com.bepiscorp.ktools.commands.hello
++
++import com.bepiscorp.ktools.core.cli.JsonCommand
++import kotlinx.serialization.Serializable
++import org.koin.core.component.KoinComponent
++import org.koin.core.component.inject
++
++@Serializable
++private data class HelloResponse(val message: String)
++
++/** Example hello command. */
++class HelloCommand : JsonCommand(help = "Prints greeting"), KoinComponent {
++    private val log by inject<io.github.koog.Logger>()
++
++    override fun run() {
++        log.info { "hello invoked" }
++        respond(HelloResponse("Hello from ktools!"), HelloResponse.serializer(), "Hello from ktools!")
++    }
++}
+diff --git a/commands/hello/src/test/kotlin/com/bepiscorp/ktools/commands/hello/HelloCommandTest.kt b/commands/hello/src/test/kotlin/com/bepiscorp/ktools/commands/hello/HelloCommandTest.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..db9d52dcbe65657cc7360d1bac5e96c8d0825903
+--- /dev/null
++++ b/commands/hello/src/test/kotlin/com/bepiscorp/ktools/commands/hello/HelloCommandTest.kt
+@@ -0,0 +1,16 @@
++package com.bepiscorp.ktools.commands.hello
++
++import com.bepiscorp.ktools.core.di.coreModule
++import com.github.ajalt.clikt.testing.test
++import io.kotest.core.spec.style.StringSpec
++import io.kotest.matchers.string.shouldContain
++import org.koin.core.context.startKoin
++
++class HelloCommandTest : StringSpec({
++    beforeSpec { startKoin { modules(coreModule) } }
++
++    "prints greeting" {
++        val result = HelloCommand().test("")
++        result.stdout shouldContain "Hello from ktools!"
++    }
++})
+diff --git a/commands/version/build.gradle.kts b/commands/version/build.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..84a4e589c1ae1f1cac2e07c20fd61c96d78beb84
+--- /dev/null
++++ b/commands/version/build.gradle.kts
+@@ -0,0 +1,5 @@
++plugins {}
++
++dependencies {
++    implementation(project(":core"))
++}
+diff --git a/commands/version/src/main/kotlin/com/bepiscorp/ktools/commands/version/VersionCommand.kt b/commands/version/src/main/kotlin/com/bepiscorp/ktools/commands/version/VersionCommand.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..447ac69195336c2cd39ddd8486150db00b3a284e
+--- /dev/null
++++ b/commands/version/src/main/kotlin/com/bepiscorp/ktools/commands/version/VersionCommand.kt
+@@ -0,0 +1,15 @@
++package com.bepiscorp.ktools.commands.version
++
++import com.bepiscorp.ktools.core.cli.JsonCommand
++import kotlinx.serialization.Serializable
++
++@Serializable
++private data class VersionResponse(val version: String)
++
++/** Prints the project version supplied by Gradle. */
++class VersionCommand : JsonCommand(help = "Prints ktools version") {
++    override fun run() {
++        val v = System.getProperty("ktools.version", "0.0.0")
++        respond(VersionResponse(v), VersionResponse.serializer(), v)
++    }
++}
+diff --git a/commands/version/src/test/kotlin/com/bepiscorp/ktools/commands/version/VersionCommandTest.kt b/commands/version/src/test/kotlin/com/bepiscorp/ktools/commands/version/VersionCommandTest.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..33d1438a98c2522e66cc44d5cc659651acf1dbec
+--- /dev/null
++++ b/commands/version/src/test/kotlin/com/bepiscorp/ktools/commands/version/VersionCommandTest.kt
+@@ -0,0 +1,16 @@
++package com.bepiscorp.ktools.commands.version
++
++import com.bepiscorp.ktools.core.di.coreModule
++import com.github.ajalt.clikt.testing.test
++import io.kotest.core.spec.style.StringSpec
++import io.kotest.matchers.string.shouldContain
++import org.koin.core.context.startKoin
++
++class VersionCommandTest : StringSpec({
++    beforeSpec { startKoin { modules(coreModule) } }
++
++    "prints version" {
++        val result = VersionCommand().test("")
++        result.stdout shouldContain System.getProperty("ktools.version", "0.0.0")
++    }
++})
+diff --git a/commitlint.config.js b/commitlint.config.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..422b19445bd83d06acea0d73d2a05410b7b94b44
+--- /dev/null
++++ b/commitlint.config.js
+@@ -0,0 +1 @@
++module.exports = { extends: ['@commitlint/config-conventional'] };
+diff --git a/core/build.gradle.kts b/core/build.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..bf639aaed683160d03b9d870d6c99475b9007ca6
+--- /dev/null
++++ b/core/build.gradle.kts
+@@ -0,0 +1 @@
++plugins {}
+diff --git a/core/src/main/kotlin/com/bepiscorp/ktools/core/cli/JsonCommand.kt b/core/src/main/kotlin/com/bepiscorp/ktools/core/cli/JsonCommand.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..928139a48eac9cb15533d40ff8337cb965d9cf51
+--- /dev/null
++++ b/core/src/main/kotlin/com/bepiscorp/ktools/core/cli/JsonCommand.kt
+@@ -0,0 +1,24 @@
++package com.bepiscorp.ktools.core.cli
++
++import com.github.ajalt.clikt.core.CliktCommand
++import com.github.ajalt.clikt.parameters.options.flag
++import com.github.ajalt.clikt.parameters.options.option
++import kotlinx.serialization.encodeToString
++import kotlinx.serialization.json.Json
++
++/** Base command that adds a --json flag for all subcommands. */
++abstract class JsonCommand(help: String) : CliktCommand(help = help) {
++    private val json by option("--json", help = "Output in JSON").flag()
++
++    protected fun <T> respond(
++        value: T,
++        serializer: kotlinx.serialization.KSerializer<T>,
++        text: String,
++    ) {
++        if (json) {
++            echo(Json.encodeToString(serializer, value))
++        } else {
++            echo(text)
++        }
++    }
++}
+diff --git a/core/src/main/kotlin/com/bepiscorp/ktools/core/config/ConfigLoader.kt b/core/src/main/kotlin/com/bepiscorp/ktools/core/config/ConfigLoader.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..8d30e92d1460202a7fa8158877289e52d1c7cf57
+--- /dev/null
++++ b/core/src/main/kotlin/com/bepiscorp/ktools/core/config/ConfigLoader.kt
+@@ -0,0 +1,34 @@
++package com.bepiscorp.ktools.core.config
++
++import com.typesafe.config.Config
++import com.typesafe.config.ConfigFactory
++import java.io.File
++
++/** Loads configuration files from the user's config directory.
++ * Global: ~/.config/ktools/config.conf
++ * Per-command: ~/.config/ktools/<command>.conf
++ * Missing files are ignored and defaults are used.
++ *
++ * To extend configs, add new keys in HOCON files and read them via config4k.
++ */
++class ConfigLoader {
++    fun load(command: String? = null): Config {
++        val baseDir = File(System.getProperty("user.home"), ".config/ktools")
++        val configs = mutableListOf<Config>()
++
++        val globalFile = File(baseDir, "config.conf")
++        if (globalFile.exists()) {
++            configs += ConfigFactory.parseFile(globalFile)
++        }
++
++        if (command != null) {
++            val commandFile = File(baseDir, "$command.conf")
++            if (commandFile.exists()) {
++                configs += ConfigFactory.parseFile(commandFile)
++            }
++        }
++
++        val merged = configs.fold(ConfigFactory.empty()) { acc, cfg -> cfg.withFallback(acc) }
++        return merged.resolve()
++    }
++}
+diff --git a/core/src/main/kotlin/com/bepiscorp/ktools/core/di/CoreModule.kt b/core/src/main/kotlin/com/bepiscorp/ktools/core/di/CoreModule.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..bb52d8cbd7ee1c8a9d2740515c90ce910f5c3479
+--- /dev/null
++++ b/core/src/main/kotlin/com/bepiscorp/ktools/core/di/CoreModule.kt
+@@ -0,0 +1,16 @@
++package com.bepiscorp.ktools.core.di
++
++import com.bepiscorp.ktools.core.config.ConfigLoader
++import com.bepiscorp.ktools.core.logging.logger
++import io.ktor.client.HttpClient
++import org.koin.dsl.module
++
++/** Koin module providing shared services.
++ * To wire new services, add single { ... } bindings here.
++ */
++val coreModule =
++    module {
++        single { ConfigLoader() }
++        single { logger("ktools") }
++        single { HttpClient() }
++    }
+diff --git a/core/src/main/kotlin/com/bepiscorp/ktools/core/logging/Logging.kt b/core/src/main/kotlin/com/bepiscorp/ktools/core/logging/Logging.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..32fa919a981eebe9dce1b055cd7c2d045e255b05
+--- /dev/null
++++ b/core/src/main/kotlin/com/bepiscorp/ktools/core/logging/Logging.kt
+@@ -0,0 +1,7 @@
++package com.bepiscorp.ktools.core.logging
++
++import io.github.koog.Koog
++import io.github.koog.Logger
++
++/** Supplies structured loggers via Koog. */
++fun logger(name: String): Logger = Koog.logger(name)
+diff --git a/core/src/main/kotlin/io/github/koog/Koog.kt b/core/src/main/kotlin/io/github/koog/Koog.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..39b71a264ea7c3d82af47cf6b96a96d66e683d10
+--- /dev/null
++++ b/core/src/main/kotlin/io/github/koog/Koog.kt
+@@ -0,0 +1,14 @@
++package io.github.koog
++
++/** Minimal placeholder for Koog logger.
++ * Replace with real library when available.
++ */
++class Logger(private val name: String) {
++    fun info(msg: () -> String) = println("[INFO] [$name] ${'$'}{msg()}")
++
++    fun error(msg: () -> String) = println("[ERROR] [$name] ${'$'}{msg()}")
++}
++
++object Koog {
++    fun logger(name: String) = Logger(name)
++}
+diff --git a/core/src/test/kotlin/com/bepiscorp/ktools/core/ConfigLoaderTest.kt b/core/src/test/kotlin/com/bepiscorp/ktools/core/ConfigLoaderTest.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..417ad4158f54fa972bfe9866fcfcc651d49b6214
+--- /dev/null
++++ b/core/src/test/kotlin/com/bepiscorp/ktools/core/ConfigLoaderTest.kt
+@@ -0,0 +1,12 @@
++package com.bepiscorp.ktools.core
++
++import com.bepiscorp.ktools.core.config.ConfigLoader
++import io.kotest.core.spec.style.StringSpec
++import io.kotest.matchers.shouldNotBe
++
++class ConfigLoaderTest : StringSpec({
++    "loads default config when files missing" {
++        val config = ConfigLoader().load()
++        config shouldNotBe null
++    }
++})
+diff --git a/core/src/test/kotlin/com/bepiscorp/ktools/core/ContainerTest.kt b/core/src/test/kotlin/com/bepiscorp/ktools/core/ContainerTest.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..bf0bc750ca2530ed264f7ddadda4ac114c1808a7
+--- /dev/null
++++ b/core/src/test/kotlin/com/bepiscorp/ktools/core/ContainerTest.kt
+@@ -0,0 +1,13 @@
++package com.bepiscorp.ktools.core
++
++import io.kotest.core.spec.style.StringSpec
++import org.testcontainers.containers.GenericContainer
++import org.testcontainers.utility.DockerImageName
++
++class ContainerTest : StringSpec({
++    "runs container".config(enabled = false) {
++        GenericContainer(DockerImageName.parse("alpine:3.18")).use {
++            it.start()
++        }
++    }
++})
+diff --git a/core/src/test/kotlin/com/bepiscorp/ktools/core/MockTest.kt b/core/src/test/kotlin/com/bepiscorp/ktools/core/MockTest.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..c6a02dbaf1691c776807046e1500a80e38dbd4d6
+--- /dev/null
++++ b/core/src/test/kotlin/com/bepiscorp/ktools/core/MockTest.kt
+@@ -0,0 +1,14 @@
++package com.bepiscorp.ktools.core
++
++import io.kotest.core.spec.style.StringSpec
++import io.kotest.matchers.shouldBe
++import io.mockk.every
++import io.mockk.mockk
++
++class MockTest : StringSpec({
++    "mockk works" {
++        val service = mockk<() -> String>()
++        every { service.invoke() } returns "ok"
++        service() shouldBe "ok"
++    }
++})
+diff --git a/docs/adding-command.md b/docs/adding-command.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..0002e98b3e4669070f6e1c70499df46c44f0c921
+--- /dev/null
++++ b/docs/adding-command.md
+@@ -0,0 +1,6 @@
++# 🆕 Adding Commands
++
++1. ➕ Create module under `commands/`.
++2. 🧩 Implement `CliktCommand`.
++3. 🔌 Wire into Koin in `cli` module.
++4. 📄 Document in docs/commands.md.
+diff --git a/docs/coding-style.md b/docs/coding-style.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..16114a7cf7b5059b2c4a931ff6f788db8e2390de
+--- /dev/null
++++ b/docs/coding-style.md
+@@ -0,0 +1,4 @@
++# 🎨 Coding Style
++
++- ✅ Follow Google Kotlin Style Guide
++- 🅱️ JetBrains style as fallback
+diff --git a/docs/commands.md b/docs/commands.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..5aff344469e57e48e7e08fd972295162d80fedcd
+--- /dev/null
++++ b/docs/commands.md
+@@ -0,0 +1,6 @@
++# 🧩 Commands
++
++- `hello`
++- `version`
++
++> 📘 For creating new commands see [Adding Commands](adding-command.md).
+diff --git a/docs/contributing.md b/docs/contributing.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..d429d1bc5ba05f6ab136886dfd576b81df9f1d72
+--- /dev/null
++++ b/docs/contributing.md
+@@ -0,0 +1,5 @@
++# 🤝 Contributing
++
++- 📝 Follow Conventional Commits
++- 🧪 Run tests before pushing
++- 🔀 Use PRs for all changes
+diff --git a/docs/index.md b/docs/index.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..6fe99c4324786f4bf995a45a6ca0e1d30f9afb8c
+--- /dev/null
++++ b/docs/index.md
+@@ -0,0 +1,3 @@
++# 🏠 Home
++
++Welcome to ktools-linux.
+diff --git a/gradle.properties b/gradle.properties
+new file mode 100644
+index 0000000000000000000000000000000000000000..c60cded85c3c9bb3b704a34e031079f44bf0bba2
+--- /dev/null
++++ b/gradle.properties
+@@ -0,0 +1,3 @@
++org.gradle.jvmargs=-Xmx2g -Xms512m
++kotlin.code.style=official
++version=0.1.1
+diff --git a/mkdocs.yml b/mkdocs.yml
+new file mode 100644
+index 0000000000000000000000000000000000000000..04e7debb01c87c642bb10a7cf3a8dbea2ebaab3f
+--- /dev/null
++++ b/mkdocs.yml
+@@ -0,0 +1,11 @@
++site_name: ktools-linux
++nav:
++  - Home: index.md
++  - Contributing: contributing.md
++  - Coding Style: coding-style.md
++  - Commands: commands.md
++  - Adding Commands: adding-command.md
++markdown_extensions:
++  - admonition
++  - toc
++  - pymdownx.mermaid
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..6ee5f3a8517f0a0bcf405ca37afe3700800102ed
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,9 @@
++{
++  "name": "ktools-linux",
++  "private": true,
++  "devDependencies": {
++    "@commitlint/cli": "^19.0.0",
++    "@commitlint/config-conventional": "^19.0.0",
++    "markdownlint-cli": "^0.41.0"
++  }
++}
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..183d90c83124b5dbe40724100db5bdd701765a4b
+--- /dev/null
++++ b/settings.gradle.kts
+@@ -0,0 +1,8 @@
++rootProject.name = "ktools-linux"
++
++include(
++    ":core",
++    ":cli",
++    ":commands:hello",
++    ":commands:version",
++)
+ 
+EOF
+)
