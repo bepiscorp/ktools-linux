@@ -37,7 +37,7 @@ class DockerBridge {
                     is InputFile.Remote -> downloadContent(input.url)
                 }
 
-                // Create temporary files for Docker volume mounts
+                // Create temporary files for Docker transfer
                 val tempDir = Files.createTempDirectory("ktools-md2pdf").toFile()
                 val inputFile = File(tempDir, "input.md")
                 val outputFile = File(tempDir, "output.pdf")
@@ -206,7 +206,14 @@ class DockerBridge {
         options: Map<String, Any>
     ): Boolean =
         withContext(Dispatchers.IO) {
+            // Ensure workspace exists inside container
+            ProcessBuilder("docker", "exec", containerId, "mkdir", "-p", "/workspace")
+                .redirectErrorStream(true)
+                .start()
+                .waitFor()
+
             // Copy input file into container
+            // See https://docs.docker.com/engine/reference/commandline/cp/
             val copyIn = ProcessBuilder(
                 "docker",
                 "cp",
@@ -218,7 +225,7 @@ class DockerBridge {
             copyIn.waitFor()
             if (copyIn.exitValue() != 0) {
                 val err = copyIn.inputStream.bufferedReader().readText()
-                throw RuntimeException("Failed to copy input into container: $err")
+                throw RuntimeException("Failed to copy input file to container: $err")
             }
 
             // Build conversion command
@@ -238,7 +245,7 @@ class DockerBridge {
                 .start()
 
             val timeoutSeconds = (options["timeout"] as? Int) ?: 60
-            val completed = withTimeout(timeoutSeconds.seconds) {
+            withTimeout(timeoutSeconds.seconds) {
                 process.waitFor()
             }
 
@@ -254,15 +261,25 @@ class DockerBridge {
                 "docker",
                 "cp",
                 "$containerId:/workspace/${outputFile.name}",
-                outputFile.absolutePath
+                outputFile.absolutePath,
             ).redirectErrorStream(true)
                 .start()
 
             copyOut.waitFor()
             if (copyOut.exitValue() != 0) {
                 val err = copyOut.inputStream.bufferedReader().readText()
-                throw RuntimeException("Failed to copy output from container: $err")
             }
+
+            // Clean up files inside container when reusing
+            ProcessBuilder(
+                "docker",
+                "exec",
+                containerId,
+                "rm",
+                "-f",
+                "/workspace/${inputFile.name}",
+                "/workspace/${outputFile.name}"
+            ).redirectErrorStream(true).start().waitFor()
 
             return@withContext outputFile.exists()
         }
